@@ -119,6 +119,10 @@ int XLALSimInspiralChooseTDWaveformFromCache(
         REAL8 i,                                /**< inclination of source (rad) */
         REAL8 lambda1,                          /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
         REAL8 lambda2,                          /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+	REAL8 bN1,                     		/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+	REAL8 bN2,                       	/**< beta*N for body 2 */
+	REAL8 wHat1,                       	/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+	REAL8 wHat2,                       	/**< omega/(200*omega_0) for body 2. */
         LALSimInspiralWaveformFlags *waveFlags, /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
         LALSimInspiralTestGRParam *nonGRparams, /**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
         int amplitudeO,                         /**< twice post-Newtonian amplitude order */
@@ -137,7 +141,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
     if ( nonGRparams != NULL || (!cache) )
         return XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef, deltaT,
                 m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i,
-                lambda1, lambda2, waveFlags, nonGRparams, amplitudeO, phaseO,
+                lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO, phaseO,
                 approximant);
 
     // Check which parameters have changed
@@ -166,7 +170,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
     if( (changedParams & INTRINSIC) != 0 ) {
         status = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef, deltaT,
                 m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i,
-                lambda1, lambda2, waveFlags, nonGRparams, amplitudeO, phaseO,
+                lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO, phaseO,
                 approximant);
         if (status == XLAL_FAILURE) return status;
 
@@ -183,7 +187,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
         if( cache->hplus == NULL || cache->hcross == NULL) {
             status = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef,
                     deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref,
-                    r, i, lambda1, lambda2, waveFlags, nonGRparams,
+                    r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams,
                     amplitudeO, phaseO, approximant);
             if (status == XLAL_FAILURE) return status;
 
@@ -199,7 +203,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
             // Will come back and put in transformation
             status = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef,
                     deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref,
-                    r, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO,
+                    r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO,
                     phaseO, approximant);
             if (status == XLAL_FAILURE) return status;
 
@@ -214,7 +218,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
             // Will come back and put in transformation
             status = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef,
                     deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref,
-                    r, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO,
+                    r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO,
                     phaseO, approximant);
             if (status == XLAL_FAILURE) return status;
 
@@ -262,7 +266,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
         if( cache->hplus == NULL || cache->hcross == NULL) {
             status = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef,
                     deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref,
-                    r, i, lambda1, lambda2, waveFlags, nonGRparams,
+                    r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams,
                     amplitudeO, phaseO, approximant);
             if (status == XLAL_FAILURE) return status;
 
@@ -338,7 +342,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
             // FIXME: This will change to a code-path: inputs->hlms->{h+,hx}
             status = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef,
                     deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref,
-                    r, i, lambda1, lambda2, waveFlags, nonGRparams,
+                    r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams,
                     amplitudeO, phaseO, approximant);
             if (status == XLAL_FAILURE) return status;
 
@@ -354,7 +358,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
             // Will come back and put in transformation
             status = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef,
                     deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref,
-                    r, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO,
+                    r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO,
                     phaseO, approximant);
             if (status == XLAL_FAILURE) return status;
 
@@ -370,7 +374,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
             // Will come back and put in transformation
             status = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef,
                     deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref,
-                    r, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO,
+                    r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO,
                     phaseO, approximant);
             if (status == XLAL_FAILURE) return status;
 
@@ -417,7 +421,7 @@ int XLALSimInspiralChooseTDWaveformFromCache(
     else {
         return XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef, deltaT,
                 m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i,
-                lambda1, lambda2, waveFlags, nonGRparams, amplitudeO, phaseO,
+                lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO, phaseO,
                 approximant);
     }
 }

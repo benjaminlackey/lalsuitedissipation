@@ -34,6 +34,7 @@ struct tagLALSimInspiralWaveformFlags
     LALSimInspiralTidalOrder tideO; /**< PN order of spin effects */
     LALSimInspiralFrameAxis axisChoice; /**< Flag to set frame z-axis convention */
     LALSimInspiralModesChoice modesChoice; /**< Flag to control which modes are included in IMR models */
+    LALSimInspiralDissipation diss; /**< Flag to turn on or off dissipation from saturated daughter modes */
 };
 
 /**
@@ -62,7 +63,8 @@ LALSimInspiralWaveformFlags *XLALSimInspiralCreateWaveformFlags(void)
             LAL_SIM_INSPIRAL_FRAME_AXIS_DEFAULT);
     XLALSimInspiralSetModesChoice(waveFlags,
             LAL_SIM_INSPIRAL_MODES_CHOICE_DEFAULT);
-
+    XLALSimInspiralSetDissipation(waveFlags,
+            LAL_SIM_INSPIRAL_DISSIPATION_DEFAULT);
     return waveFlags;
 }
 
@@ -92,7 +94,8 @@ bool XLALSimInspiralWaveformFlagsIsDefault(
         XLALSimInspiralSpinOrderIsDefault(waveFlags->spinO) &&
         XLALSimInspiralTidalOrderIsDefault(waveFlags->tideO) &&
         XLALSimInspiralFrameAxisIsDefault(waveFlags->axisChoice) &&
-        XLALSimInspiralModesChoiceIsDefault(waveFlags->modesChoice));
+        XLALSimInspiralModesChoiceIsDefault(waveFlags->modesChoice) &&
+	XLALSimInspiralDissipationIsDefault(waveFlags->diss));
 }
 
 /**
@@ -108,6 +111,7 @@ bool XLALSimInspiralWaveformFlagsEqual(
     LALSimInspiralTidalOrder tideO1, tideO2;
     LALSimInspiralFrameAxis axisChoice1, axisChoice2;
     LALSimInspiralModesChoice modesChoice1, modesChoice2;
+    LALSimInspiralDissipation diss1, diss2;
 
     spinO1 = XLALSimInspiralGetSpinOrder(waveFlags1);
     spinO2 = XLALSimInspiralGetSpinOrder(waveFlags2);
@@ -117,9 +121,11 @@ bool XLALSimInspiralWaveformFlagsEqual(
     axisChoice2 = XLALSimInspiralGetFrameAxis(waveFlags2);
     modesChoice1 = XLALSimInspiralGetModesChoice(waveFlags1);
     modesChoice2 = XLALSimInspiralGetModesChoice(waveFlags2);
+    diss1 = XLALSimInspiralGetDissipation(waveFlags1);
+    diss2 = XLALSimInspiralGetDissipation(waveFlags2);
 
     return ( (spinO1==spinO2) && (tideO1==tideO2) && (axisChoice1==axisChoice2)
-            && (modesChoice1==modesChoice2) );
+            && (modesChoice1==modesChoice2) && (diss1 == diss2) );
 }
 
 /**
@@ -284,3 +290,42 @@ bool XLALSimInspiralModesChoiceIsDefault(
         return false;
 }
 
+/**
+ * Set the LALSimInspiralDissipation within a LALSimInspiralWaveformFlags struct
+ */
+void XLALSimInspiralSetDissipation(
+        LALSimInspiralWaveformFlags *waveFlags, /**< Struct whose flag will be set */
+        LALSimInspiralDissipation diss /**< value to set flag to */
+        )
+{
+    waveFlags->diss = diss;
+    return;
+}
+
+/**
+ * Get the LALSimInspiralDissipation within a LALSimInspiralWaveformFlags struct,
+ * or LAL_SIM_INSPIRAL_DISSIPATION_DEFAULT if waveFlags is NULL
+ */
+LALSimInspiralDissipation XLALSimInspiralGetDissipation(
+        LALSimInspiralWaveformFlags *waveFlags
+        )
+{
+    if ( waveFlags )
+        return waveFlags->diss;
+    else
+        return LAL_SIM_INSPIRAL_DISSIPATION_DEFAULT;
+}
+
+/**
+ * Returns true if LALSimInspiralDissipation has default value
+ * returns false otherwise
+ */
+bool XLALSimInspiralDissipationIsDefault(
+        LALSimInspiralDissipation diss
+        )
+{
+    if( diss == LAL_SIM_INSPIRAL_DISSIPATION_DEFAULT )
+        return true;
+    else
+        return false;
+}

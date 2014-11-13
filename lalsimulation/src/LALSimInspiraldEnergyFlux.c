@@ -80,6 +80,9 @@ typedef struct
    REAL8 FTaN, FTa1, FTa2, FTa3, FTa4, FTa5, FTa6, FTa7, FTa8, FTl6, FTl8, FTa10, FTa12;
    /* Coefficients of the corresponding P-approximant */
    REAL8 fPaN, fPa1, fPa2, fPa3, fPa4, fPa5, fPa6, fPa7, fPa8;
+   /* Start frequency and coefficient for dissipation from saturated daughter modes term */
+   /* !!!!!!!! Since only the TaylorT1 function is using this, you probably have to provide default values of 0 here */
+   REAL8 vdiss1, vdiss2, FTdiss1, FTdiss2;
 
    /* symmetric mass ratio, total mass, component masses */
    REAL8 eta, totalmass;
@@ -127,6 +130,13 @@ typedef struct
    expnCoeffsdEnergyFlux *coeffs;
 } TofVIn;
 
+/*
+ * Step function to determine start of saturated daughter modes.
+ */
+static REAL8 UNUSED Step(REAL8 v, REAL8 vStart)
+{
+   return (v < vStart) ? 0.0 : 1.0;
+}
 
 static REAL8 UNUSED XLALSimInspiralEt0(REAL8 v, expnCoeffsdEnergyFlux *ak)
 {
@@ -231,55 +241,60 @@ static REAL8 UNUSED XLALSimInspiralFt0(REAL8 v, expnCoeffsdEnergyFlux *ak)
 
 static REAL8 UNUSED XLALSimInspiralFt2(REAL8 v, expnCoeffsdEnergyFlux *ak)
 {
-   REAL8 flux,v2,v4,v8,v10,v12;
+   REAL8 flux,v2,v4,v6,v8,v10,v12;
    v2 = v*v;
    v4 = v2*v2;
+   v6 = v4*v2;
    v8 = v4*v4;
    v10 = v8*v2;
    v12 = v10*v2;
-   flux = ak->FTaN * v10 * (1. + ak->FTa2*v2 + ak->FTa10*v10 + ak->FTa12*v12);
+   flux = ak->FTaN * v10 * (1. + ak->FTa2*v2 + ak->FTa10*v10 + ak->FTa12*v12)
+	+ Step(v, ak->vdiss1)*ak->FTdiss1*v6 + Step(v, ak->vdiss2)*ak->FTdiss2*v6;
    return (flux);
 }
 
 
 static REAL8 UNUSED XLALSimInspiralFt3(REAL8 v, expnCoeffsdEnergyFlux *ak)
 {
-   REAL8 flux,v2,v4,v8,v10,v12;
+   REAL8 flux,v2,v4,v6,v8,v10,v12;
    v2 = v*v;
    v4 = v2*v2;
+   v6 = v4*v2;
    v8 = v4*v4;
    v10 = v8*v2;
    v12 = v10*v2;
    flux = ak->FTaN * v10 * (1. + ak->FTa2*v2 + ak->FTa3*v2*v + ak->FTa10*v10
-        + ak->FTa12*v12);
+        + ak->FTa12*v12) + Step(v, ak->vdiss1)*ak->FTdiss1*v6 + Step(v, ak->vdiss2)*ak->FTdiss2*v6;
    return (flux);
 }
 
 
 static REAL8 UNUSED XLALSimInspiralFt4(REAL8 v, expnCoeffsdEnergyFlux *ak)
 {
-   REAL8 flux,v2,v4,v8,v10,v12;
+   REAL8 flux,v2,v4,v6,v8,v10,v12;
    v2 = v*v;
    v4 = v2*v2;
+   v6 = v4*v2;
    v8 = v4*v4;
    v10 = v8*v2;
    v12 = v10*v2;
    flux = ak->FTaN * v10 * (1. + ak->FTa2*v2 + ak->FTa3*v2*v + ak->FTa4*v4
-        + ak->FTa10*v10 + ak->FTa12*v12);
+        + ak->FTa10*v10 + ak->FTa12*v12) + Step(v, ak->vdiss1)*ak->FTdiss1*v6 + Step(v, ak->vdiss2)*ak->FTdiss2*v6;
    return (flux);
 }
 
 
 static REAL8 UNUSED XLALSimInspiralFt5(REAL8 v, expnCoeffsdEnergyFlux *ak)
 {
-   REAL8 flux,v2,v4,v8,v10,v12;
+   REAL8 flux,v2,v4,v6,v8,v10,v12;
    v2 = v*v;
    v4 = v2*v2;
+   v6 = v4*v2;
    v8 = v4*v4;
    v10 = v8*v2;
    v12 = v10*v2;
    flux = ak->FTaN * v10 * (1.+ ak->FTa2*v2 + ak->FTa3*v2*v + ak->FTa4*v4
-        + ak->FTa5*v4*v + ak->FTa10*v10 + ak->FTa12*v12);
+        + ak->FTa5*v4*v + ak->FTa10*v10 + ak->FTa12*v12) + Step(v, ak->vdiss1)*ak->FTdiss1*v6 + Step(v, ak->vdiss2)*ak->FTdiss2*v6;
    return (flux);
 }
 
@@ -295,7 +310,7 @@ static REAL8 UNUSED XLALSimInspiralFt6(REAL8 v, expnCoeffsdEnergyFlux *ak)
    v12 = v10*v2;
    flux = ak->FTaN * v10 * (1.+ ak->FTa2*v2 + ak->FTa3*v2*v + ak->FTa4*v4
         + ak->FTa5*v4*v + (ak->FTa6 + ak->FTl6*log(16.0*v2))*v6 + ak->FTa10*v10
-        + ak->FTa12*v12);
+        + ak->FTa12*v12) + Step(v, ak->vdiss1)*ak->FTdiss1*v6 + Step(v, ak->vdiss2)*ak->FTdiss2*v6;
    return (flux);
 }
 
@@ -311,7 +326,7 @@ static REAL8 UNUSED XLALSimInspiralFt7(REAL8 v, expnCoeffsdEnergyFlux *ak)
    v12 = v10*v2;
    flux = ak->FTaN * v10 * (1.+ ak->FTa2*v2 + ak->FTa3*v2*v + ak->FTa4*v4
         + ak->FTa5*v4*v + (ak->FTa6 + ak->FTl6*log(16.0*v2))*v6 + ak->FTa7*v6*v
-        + ak->FTa10*v10 + ak->FTa12*v12);
+        + ak->FTa10*v10 + ak->FTa12*v12) + Step(v, ak->vdiss1)*ak->FTdiss1*v6 + Step(v, ak->vdiss2)*ak->FTdiss2*v6;
    return (flux);
 }
 

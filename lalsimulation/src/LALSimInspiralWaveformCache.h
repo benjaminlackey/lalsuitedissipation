@@ -87,6 +87,10 @@ int XLALSimInspiralChooseTDWaveformFromCache(
     REAL8 i,                    /**< inclination of source (rad) */
     REAL8 lambda1,              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                 	/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,              	/**< beta*N for body 2 */
+    REAL8 wHat1,              	/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                /**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags, /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, /**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,             /**< twice post-Newtonian amplitude order */

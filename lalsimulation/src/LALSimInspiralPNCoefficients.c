@@ -326,6 +326,41 @@ XLALSimInspiralPNFlux_12PNTidalCoeff(
 	return (-70.4 - 180.3*chi2 + 450.1*chi2*chi2 - 217.0*chi2*chi2*chi2)/2.8 * chi2*chi2*chi2*chi2 * lambda2;
 }
 
+/*
+ * Dissipation from saturated daughter modes coefficients to Flux
+ */
+static REAL8 UNUSED 
+XLALSimInspiralPNFlux_DissipationCoeff(
+	REAL8 mBody, /**< Mass of body */
+	REAL8 mComp, /**< Mass of companion */
+	REAL8 bN, /**< beta*N */
+	REAL8 wHat /**< omegahat */
+	)
+{
+	const REAL8 m = mBody + mComp; 
+	const REAL8 chiComp = mComp/m;
+	return 4.511e54 * bN * chiComp / (wHat * m * m);
+}
+
+/*
+ * Starting PN orbital speed v for daughter modes to be driven to saturation amplitude.
+ */
+static REAL8 UNUSED
+XLALSimInspiralPNFlux_DissipationStart(
+        REAL8 mBody, /**< Mass of body */
+        REAL8 mComp, /**< Mass of companion */
+        REAL8 wHat /**< omegahat */
+	)
+{
+        const REAL8 m = mBody + mComp;
+        const REAL8 chiComp = mComp/m;
+	const REAL8 fstart = 25.0 / (sqrt(chiComp) * wHat);
+	/* v = (pi*G*Mtot*f_gw/c^3)^(1/3) */
+	const REAL8 vStart = cbrt(LAL_PI * LAL_G_SI * m * fstart) / LAL_C_SI;
+	printf("%f\n", vStart);
+	return vStart;
+}
+
 /* The phasing function for TaylorF2 frequency-domain waveform.
  * This function is tested in ../test/PNCoefficients.c for consistency
  * with the energy and flux in this file.

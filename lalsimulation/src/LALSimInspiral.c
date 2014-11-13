@@ -2035,6 +2035,10 @@ int XLALSimInspiralChooseWaveform(
     REAL8 i,                                    /**< inclination of source (rad) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                     		/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                      		/**< beta*N for body 2 */
+    REAL8 wHat1,                    		/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                    		/**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -2045,7 +2049,7 @@ int XLALSimInspiralChooseWaveform(
     XLAL_PRINT_DEPRECATION_WARNING("XLALSimInspiralChooseTDWaveform");
 
     return XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef, deltaT, m1,
-        m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i, lambda1, lambda2,
+        m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2,
         waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
 }
 
@@ -2075,6 +2079,10 @@ int XLALSimInspiralChooseTDWaveform(
     REAL8 i,                                    /**< inclination of source (rad) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                      		/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                      		/**< beta*N for body 2 */
+    REAL8 wHat1,                    		/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                    		/**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -2159,8 +2167,8 @@ int XLALSimInspiralChooseTDWaveform(
                 ABORT_NONZERO_SPINS(waveFlags);
             /* Call the waveform driver routine */
             ret = XLALSimInspiralTaylorT1PNGenerator(hplus, hcross, phiRef, v0,
-                    deltaT, m1, m2, f_min, f_ref, r, i, lambda1, lambda2,
-                    XLALSimInspiralGetTidalOrder(waveFlags), amplitudeO, phaseO);
+                    deltaT, m1, m2, f_min, f_ref, r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2,
+                    XLALSimInspiralGetTidalOrder(waveFlags), XLALSimInspiralGetDissipation(waveFlags), amplitudeO, phaseO);
             break;
 
         case TaylorT2:
@@ -2867,6 +2875,10 @@ int XLALSimInspiralTD(
     REAL8 i,                                    /**< inclination of source (rad) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                                  /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                                  /**< beta*N for body 2 */
+    REAL8 wHat1,                                /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                                /**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -2915,7 +2927,7 @@ int XLALSimInspiralTD(
     case LAL_SIM_DOMAIN_TIME: {
         size_t j, nextra;
         /* generate the waveform starting at fstart */
-        retval = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, fstart, f_ref, r, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
+        retval = XLALSimInspiralChooseTDWaveform(hplus, hcross, phiRef, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, fstart, f_ref, r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
         if (retval < 0)
             XLAL_ERROR(XLAL_EFUNC);
 
@@ -2927,7 +2939,7 @@ int XLALSimInspiralTD(
             /* compute textra more accurately */
             REAL8TimeSeries *dummyplus = NULL;
             REAL8TimeSeries *dummycross = NULL;
-            retval = XLALSimInspiralChooseTDWaveform(&dummyplus, &dummycross, phiRef, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
+            retval = XLALSimInspiralChooseTDWaveform(&dummyplus, &dummycross, phiRef, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
             if (retval < 0)
                 XLAL_ERROR(XLAL_EFUNC);
             nextra = (*hplus)->data->length - dummyplus->data->length;
@@ -3086,6 +3098,10 @@ int XLALSimInspiralFD(
     REAL8 i,                                    /**< inclination of source (rad) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                                  /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                                  /**< beta*N for body 2 */
+    REAL8 wHat1,                                /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                                /**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -3148,7 +3164,7 @@ int XLALSimInspiralFD(
         size_t j, nextra;
 
         /* generate the waveform starting at fstart */
-        retval = XLALSimInspiralChooseTDWaveform(&hplus, &hcross, phiRef, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, fstart, f_ref, r, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
+        retval = XLALSimInspiralChooseTDWaveform(&hplus, &hcross, phiRef, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, fstart, f_ref, r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
         if (retval < 0)
             XLAL_ERROR(XLAL_EFUNC);
 
@@ -3160,7 +3176,7 @@ int XLALSimInspiralFD(
             /* compute textra more accurately */
             REAL8TimeSeries *dummyplus = NULL;
             REAL8TimeSeries *dummycross = NULL;
-            retval = XLALSimInspiralChooseTDWaveform(&dummyplus, &dummycross, phiRef, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
+            retval = XLALSimInspiralChooseTDWaveform(&dummyplus, &dummycross, phiRef, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO, phaseO, approximant);
             if (retval < 0)
                 XLAL_ERROR(XLAL_EFUNC);
             nextra = hplus->data->length - dummyplus->data->length;
@@ -3254,6 +3270,10 @@ SphHarmTimeSeries *XLALSimInspiralChooseTDModes(
     REAL8 r,                                    /**< distance of source (m) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,     	                 	/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                      		/**< beta*N for body 2 */
+    REAL8 wHat1,                    		/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                    		/**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -3304,8 +3324,8 @@ SphHarmTimeSeries *XLALSimInspiralChooseTDModes(
                 ABORT_NONDEFAULT_MODES_CHOICE_NULL(waveFlags);
             /* Call the waveform driver routine */
             hlm = XLALSimInspiralTaylorT1PNModes(phiRef, v0,
-                    deltaT, m1, m2, f_min, f_ref, r, lambda1, lambda2,
-                    XLALSimInspiralGetTidalOrder(waveFlags), amplitudeO,
+                    deltaT, m1, m2, f_min, f_ref, r, lambda1, lambda2, bN1, bN2, wHat1, wHat2,
+                    XLALSimInspiralGetTidalOrder(waveFlags), XLALSimInspiralGetDissipation(waveFlags), amplitudeO,
                     phaseO, lmax);
             break;
         case TaylorT2:
@@ -3406,6 +3426,10 @@ COMPLEX16TimeSeries *XLALSimInspiralChooseTDMode(
     REAL8 r,                                    /**< distance of source (m) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                      		/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                      		/**< beta*N for body 2 */
+    REAL8 wHat1,                    		/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                    		/**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -3458,8 +3482,8 @@ COMPLEX16TimeSeries *XLALSimInspiralChooseTDMode(
                 ABORT_NONDEFAULT_MODES_CHOICE_NULL(waveFlags);
             /* Call the waveform driver routine */
             hlm = XLALSimInspiralTaylorT1PNMode(phiRef, v0,
-                    deltaT, m1, m2, f_min, f_ref, r, lambda1, lambda2,
-                    XLALSimInspiralGetTidalOrder(waveFlags), amplitudeO,
+                    deltaT, m1, m2, f_min, f_ref, r, lambda1, lambda2, bN1, bN2, wHat1, wHat2,
+                    XLALSimInspiralGetTidalOrder(waveFlags), XLALSimInspiralGetDissipation(waveFlags), amplitudeO,
                     phaseO, l, m);
             break;
         case TaylorT2:

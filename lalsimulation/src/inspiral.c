@@ -63,7 +63,10 @@
 #define DEFAULT_S2Z 0.0
 #define DEFAULT_LAMBDA1 0.0
 #define DEFAULT_LAMBDA2 0.0
-
+#define DEFAULT_BN1 0.0
+#define DEFAULT_BN2 0.0
+#define DEFAULT_WHAT1 0.0
+#define DEFAULT_WHAT2 0.0
 /* parameters given in command line arguments */
 struct params {
     int verbose;
@@ -90,6 +93,10 @@ struct params {
     double s2z;
     double lambda1;
     double lambda2;
+    double bN1;
+    double bN2;
+    double wHat1;
+    double wHat2;
     LALSimInspiralWaveformFlags *waveFlags;
     LALSimInspiralTestGRParam *nonGRparams;
 };
@@ -158,7 +165,7 @@ int main(int argc, char *argv[])
         COMPLEX16FrequencySeries *htilde_cross = NULL;
         if (p.condition) { /* use stock conditioning element */
             double redshift = 0.0;
-            XLALSimInspiralFD(&htilde_plus, &htilde_cross, p.phiRef, 1.0 / p.srate, p.m1, p.m2, p.s1x, p.s1y, p.s1z, p.s2x, p.s2y, p.s2z, p.f_min, p.fRef, p.distance, redshift, p.inclination, p.lambda1, p.lambda2, p.waveFlags, p.nonGRparams, p.ampO, p.phaseO, p.approx);
+            XLALSimInspiralFD(&htilde_plus, &htilde_cross, p.phiRef, 1.0 / p.srate, p.m1, p.m2, p.s1x, p.s1y, p.s1z, p.s2x, p.s2y, p.s2z, p.f_min, p.fRef, p.distance, redshift, p.inclination, p.lambda1, p.lambda2, p.bN1, p.bN2, p.wHat1, p.wHat2, p.waveFlags, p.nonGRparams, p.ampO, p.phaseO, p.approx);
         } else { /* use our custom routine */
         	create_fd_waveform(&htilde_plus, &htilde_cross, p);
 	}
@@ -170,7 +177,7 @@ int main(int argc, char *argv[])
         REAL8TimeSeries *h_cross = NULL;
         if (p.condition) { /* use stock conditioning element */
             double redshift = 0.0;
-            XLALSimInspiralTD(&h_plus, &h_cross, p.phiRef, 1.0 / p.srate, p.m1, p.m2, p.s1x, p.s1y, p.s1z, p.s2x, p.s2y, p.s2z, p.f_min, p.fRef, p.distance, redshift, p.inclination, p.lambda1, p.lambda2, p.waveFlags, p.nonGRparams, p.ampO, p.phaseO, p.approx);
+            XLALSimInspiralTD(&h_plus, &h_cross, p.phiRef, 1.0 / p.srate, p.m1, p.m2, p.s1x, p.s1y, p.s1z, p.s2x, p.s2y, p.s2z, p.f_min, p.fRef, p.distance, redshift, p.inclination, p.lambda1, p.lambda2, p.bN1, p.bN2, p.wHat1, p.wHat2, p.waveFlags, p.nonGRparams, p.ampO, p.phaseO, p.approx);
         } else { /* use our custom routine */
             create_td_waveform(&h_plus, &h_cross, p);
         }
@@ -459,7 +466,7 @@ int generate_td_waveform(REAL8TimeSeries ** h_plus, REAL8TimeSeries ** h_cross, 
         timer_start = clock();
     }
     XLALSimInspiralChooseTDWaveform(h_plus, h_cross, p.phiRef, 1.0 / p.srate, p.m1, p.m2, p.s1x, p.s1y, p.s1z, p.s2x, p.s2y,
-        p.s2z, fstart, p.fRef, p.distance, p.inclination, p.lambda1, p.lambda2, p.waveFlags, p.nonGRparams, p.ampO, p.phaseO,
+        p.s2z, fstart, p.fRef, p.distance, p.inclination, p.lambda1, p.lambda2, p.bN1, p.bN2, p.wHat1, p.wHat2, p.waveFlags, p.nonGRparams, p.ampO, p.phaseO,
         p.approx);
     if (p.verbose)
         fprintf(stderr, "generation took %g seconds\n", (double)(clock() - timer_start) / CLOCKS_PER_SEC);
@@ -474,7 +481,7 @@ int generate_td_waveform(REAL8TimeSeries ** h_plus, REAL8TimeSeries ** h_cross, 
             REAL8TimeSeries *dummy_plus = NULL;
             REAL8TimeSeries *dummy_cross = NULL;
             XLALSimInspiralChooseTDWaveform(&dummy_plus, &dummy_cross, p.phiRef, 1.0 / p.srate, p.m1, p.m2, p.s1x, p.s1y,
-                p.s1z, p.s2x, p.s2y, p.s2z, p.f_min, p.fRef, p.distance, p.inclination, p.lambda1, p.lambda2, p.waveFlags,
+                p.s1z, p.s2x, p.s2y, p.s2z, p.f_min, p.fRef, p.distance, p.inclination, p.lambda1, p.lambda2, p.bN1, p.bN2, p.wHat1, p.wHat2, p.waveFlags,
                 p.nonGRparams, p.ampO, p.phaseO, p.approx);
             n = (*h_plus)->data->length - dummy_plus->data->length;
             textra = n / p.srate;
@@ -703,6 +710,14 @@ int usage(const char *program)
         DEFAULT_LAMBDA1);
     fprintf(stderr, "\t-l LAM2, --tidal-lambda2=LAM2   \n\t\tdimensionless tidal deformability of secondary [%g]\n",
         DEFAULT_LAMBDA2);
+    fprintf(stderr, "\t-B BN1, --bN1=BN1	       \n\t\tbeta*N of primary [%g]\n",
+        DEFAULT_BN1);
+    fprintf(stderr, "\t-b BN2, --bN2=BN2   	       \n\t\tbeta*N of secondary [%g]\n",
+        DEFAULT_BN2);
+    fprintf(stderr, "\t-W WHAT1, --wHat1=WHAT1         \n\t\tdimensionless daughter p-mode frequency omega/(200omega_0) of primary [%g]\n",
+        DEFAULT_WHAT1);
+    fprintf(stderr, "\t-w WHAT2, --wHat2=WHAT2         \n\t\tdimensionless daughter p-mode frequency omega/(200omega_0) of secondary [%g]\n",
+        DEFAULT_WHAT2);
     fprintf(stderr, "\t-s SPINO, --spin-order=SPINO    \n\t\ttwice pN order of spin effects (-1 == all) [%d]\n",
         LAL_SIM_INSPIRAL_SPIN_ORDER_DEFAULT);
     fprintf(stderr, "\t-t TIDEO, --tidal-order=TIDEO   \n\t\ttwice pN order of tidal effects (-1 == all) [%d]\n",
@@ -769,6 +784,10 @@ struct params parseargs(int argc, char **argv)
         .s2z = DEFAULT_S2Z,
         .lambda1 = DEFAULT_LAMBDA1,
         .lambda2 = DEFAULT_LAMBDA2,
+	.bN1 = DEFAULT_BN1,
+        .bN2 = DEFAULT_BN2,
+        .wHat1 = DEFAULT_WHAT1,
+        .wHat2 = DEFAULT_WHAT2,
         .waveFlags = NULL,
         .nonGRparams = NULL
     };

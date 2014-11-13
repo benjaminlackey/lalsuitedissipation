@@ -1114,7 +1114,8 @@ REAL8 calculate_lalsim_snr(SimInspiralTable *inj, char *IFOname, REAL8FrequencyS
   REAL8 m1,m2, s1x,s1y,s1z,s2x,s2y,s2z,phi0,f_min,f_max,iota,polarization,
 
   /* No tidal PN terms until injtable is able to get them */
-  lambda1=0.0,lambda2=0.0;
+  lambda1=0.0,lambda2=0.0,
+  bN1=0.0, bN2=0.0, wHat1=0.0, wHat2=0.0;
 
   LALSimInspiralWaveformFlags *waveFlags= XLALSimInspiralCreateWaveformFlags();
 
@@ -1265,7 +1266,7 @@ REAL8 calculate_lalsim_snr(SimInspiralTable *inj, char *IFOname, REAL8FrequencyS
       timeHplus->data->data[j]=0.0;
     XLAL_TRY(ret=XLALSimInspiralChooseTDWaveform(&hplus, &hcross, phi0, deltaT,
         m1, m2, s1x, s1y, s1z, s2x, s2y, s2z, f_min, 0., LAL_PC_SI*1.0e6,
-        iota, lambda1, lambda2, waveFlags, nonGRparams, amporder, order, approx),
+        iota, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amporder, order, approx),
         errnum);
 
     if (ret == XLAL_FAILURE || hplus == NULL || hcross == NULL)

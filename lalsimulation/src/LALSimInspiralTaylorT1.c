@@ -66,7 +66,7 @@ typedef struct
 	expnCoeffsdEnergyFlux akdEF;
 
 	/* symmetric mass ratio and total mass */
-	REAL8 nu,m,mchirp,chi1,chi2,lambda1,lambda2;
+	REAL8 nu,m,mchirp,chi1,chi2,lambda1,lambda2, bN1, bN2, wHat1, wHat2;
 } expnCoeffsTaylorT1;
 
 typedef REAL8 (SimInspiralTaylorT1Energy)(
@@ -142,12 +142,17 @@ static int
 XLALSimInspiralTaylorT1Setup(
     expnCoeffsTaylorT1 *ak,			/**< coefficients for TaylorT1 evolution [modified] */
     expnFuncTaylorT1 *f,			/**< functions for TaylorT1 evolution [modified] */
-    REAL8 m1,					    /**< mass of companion 1 (kg) */
-    REAL8 m2,					    /**< mass of companion 2 (kg) */
-    REAL8 lambda1,				    /**< (tidal deformability of body 1)/(mass of body 1)^5 */
-    REAL8 lambda2,				    /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-    LALSimInspiralTidalOrder tideO,	/**< twice PN order of tidal effects */
-    int O					        /**< twice post-Newtonian order */
+    REAL8 m1,					/**< mass of companion 1 (kg) */
+    REAL8 m2,					/**< mass of companion 2 (kg) */
+    REAL8 lambda1,				/**< (tidal deformability of body 1)/(mass of body 1)^5 */
+    REAL8 lambda2,				/**< (tidal deformability of body 2)/(mass of body 2)^5 */
+    REAL8 bN1,					/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */                 
+    REAL8 bN2,					/**< beta*N for body 2 */
+    REAL8 wHat1,				/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,				/**< omega/(200*omega_0) for body 2. */
+    LALSimInspiralTidalOrder tideO,		/**< twice PN order of tidal effects */
+    LALSimInspiralDissipation diss,		/**< flag for dissipation from saturated p and g modes */
+    int O					/**< twice post-Newtonian order */
 )
 {
     ak->m = m1 + m2;
@@ -215,6 +220,30 @@ XLALSimInspiralTaylorT1Setup(
         default:
             XLALPrintError("XLAL Error - %s: Invalid tidal PN order %s\nSee LALSimInspiralTidalOrder enum in LALSimInspiralWaveformFlags.h for valid tidal orders.\n",
                     __func__, tideO );
+            XLAL_ERROR(XLAL_EINVAL);
+            break;
+    }
+    ak->akdEF.dETa5 = 6.0 * ak->akdEF.ETa5;
+    ak->akdEF.dETa6 = 7.0 * ak->akdEF.ETa6;
+
+    /* Dissipation from saturated modes co-efficient for flux. */
+    /* There is no energy term. */
+    ak->akdEF.FTdiss1 = 0.;
+    ak->akdEF.FTdiss2 = 0.;
+    ak->akdEF.vdiss1 = 0.; /* Dissipation term will be on for all v>0, but coefficient is set to 0 anyway. */
+    ak->akdEF.vdiss2 = 0.;
+    switch( diss )
+    {
+        case LAL_SIM_INSPIRAL_DISSIPATION_ON:
+            ak->akdEF.FTdiss1 = XLALSimInspiralPNFlux_DissipationCoeff(m1, m2, bN1, wHat1);
+	    ak->akdEF.FTdiss2 = XLALSimInspiralPNFlux_DissipationCoeff(m2, m1, bN2, wHat2);
+            ak->akdEF.vdiss1 = XLALSimInspiralPNFlux_DissipationStart(m1, m2, wHat1);
+            ak->akdEF.vdiss2 = XLALSimInspiralPNFlux_DissipationStart(m2, m1, wHat2);
+        case LAL_SIM_INSPIRAL_DISSIPATION_OFF:
+            break;
+        default:
+            XLALPrintError("XLAL Error - %s: Invalid dissipation flag %s\nSee LALSimInspiralDissipation enum in LALSimInspiralWaveformFlags.h for valid dissipation flags.\n",
+                    __func__, diss );
             XLAL_ERROR(XLAL_EINVAL);
             break;
     }
@@ -295,7 +324,12 @@ int XLALSimInspiralTaylorT1PNEvolveOrbit(
 		REAL8 fRef,                     /**< reference GW frequency (Hz) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< flag to control spin and tidal effects */
+		REAL8 bN1,			/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    		REAL8 bN2,         		/**< beta*N for body 2 */
+    		REAL8 wHat1,          		/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    		REAL8 wHat2,                  	/**< omega/(200*omega_0) for body 2. */
+    		LALSimInspiralTidalOrder tideO,	/**< twice PN order of tidal effects */
+    		LALSimInspiralDissipation diss,	/**< flag for dissipation from saturated p and g modes */
 		int O                           /**< twice post-Newtonian order */
 		)
 {
@@ -306,7 +340,7 @@ int XLALSimInspiralTaylorT1PNEvolveOrbit(
 	expnFuncTaylorT1 expnfunc;
 	expnCoeffsTaylorT1 ak;
 
-	if(XLALSimInspiralTaylorT1Setup(&ak,&expnfunc,m1,m2,lambda1,lambda2,tideO,O))
+	if(XLALSimInspiralTaylorT1Setup(&ak,&expnfunc,m1,m2,lambda1,lambda2,bN1,bN2,wHat1,wHat2,tideO,diss,O))
 		XLAL_ERROR(XLAL_EFUNC);
 
 	params.flux=expnfunc.flux;
@@ -417,7 +451,12 @@ int XLALSimInspiralTaylorT1PNGenerator(
 		REAL8 i,                        /**< inclination of source (rad) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< flag to control spin and tidal effects */
+    		REAL8 bN1,           		/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    		REAL8 bN2,                 	/**< beta*N for body 2 */
+    		REAL8 wHat1,                  	/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    		REAL8 wHat2,                  	/**< omega/(200*omega_0) for body 2. */
+    		LALSimInspiralTidalOrder tideO,	/**< twice PN order of tidal effects */
+    		LALSimInspiralDissipation diss,	/**< flag for dissipation from saturated p and g modes */
 		int amplitudeO,                 /**< twice post-Newtonian amplitude order */
 		int phaseO                      /**< twice post-Newtonian phase order */
 		)
@@ -450,7 +489,7 @@ int XLALSimInspiralTaylorT1PNGenerator(
 	int status;
 	int n;
 	n = XLALSimInspiralTaylorT1PNEvolveOrbit(&V, &phi, phiRef, deltaT,
-			m1, m2, f_min, fRef, lambda1, lambda2, tideO, phaseO);
+			m1, m2, f_min, fRef, lambda1, lambda2, bN1, bN2, wHat1, wHat2, tideO, diss, phaseO);
 	if ( n < 0 )
 		XLAL_ERROR(XLAL_EFUNC);
 	status = XLALSimInspiralPNPolarizationWaveforms(hplus, hcross, V, phi,
@@ -473,7 +512,12 @@ SphHarmTimeSeries *XLALSimInspiralTaylorT1PNModes(
 		REAL8 r,                        /**< distance of source (m) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(individual mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(individual mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< flag to control spin and tidal effects */
+		REAL8 bN1,     			/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    		REAL8 bN2,                	/**< beta*N for body 2 */
+    		REAL8 wHat1,                	/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    		REAL8 wHat2,                	/**< omega/(200*omega_0) for body 2. */
+    		LALSimInspiralTidalOrder tideO,	/**< twice PN order of tidal effects */
+    		LALSimInspiralDissipation diss,	/**< flag for dissipation from saturated p and g modes */
 		int amplitudeO,                 /**< twice post-Newtonian amplitude order */
 		int phaseO,                     /**< twice post-Newtonian phase order */
 		int lmax                        /**< generate all modes with l <= lmax */
@@ -507,7 +551,7 @@ SphHarmTimeSeries *XLALSimInspiralTaylorT1PNModes(
 	REAL8TimeSeries *phi;
 	int n;
 	n = XLALSimInspiralTaylorT1PNEvolveOrbit(&V, &phi, phiRef, deltaT,
-			m1, m2, f_min, fRef, lambda1, lambda2, tideO, phaseO);
+			m1, m2, f_min, fRef, lambda1, lambda2, bN1, bN2, wHat1, wHat2, tideO, diss, phaseO);
 	if ( n < 0 )
 		XLAL_ERROR_NULL(XLAL_EFUNC);
 	int m, l;
@@ -543,7 +587,12 @@ COMPLEX16TimeSeries *XLALSimInspiralTaylorT1PNMode(
 		REAL8 r,                        /**< distance of source (m) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(individual mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(individual mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< flag to control spin and tidal effects */
+		REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int amplitudeO,                 /**< twice post-Newtonian amplitude order */
 		int phaseO,                     /**< twice post-Newtonian phase order */
 		int l,                          /**< l index of mode */
@@ -578,7 +627,7 @@ COMPLEX16TimeSeries *XLALSimInspiralTaylorT1PNMode(
 	REAL8TimeSeries *phi;
 	int n;
 	n = XLALSimInspiralTaylorT1PNEvolveOrbit(&V, &phi, phiRef, deltaT,
-			m1, m2, f_min, fRef, lambda1, lambda2, tideO, phaseO);
+			m1, m2, f_min, fRef, lambda1, lambda2, bN1, bN2, wHat1, wHat2, tideO, diss, phaseO);
 	if ( n < 0 )
 		XLAL_ERROR_NULL(XLAL_EFUNC);
 	hlm = XLALCreateSimInspiralPNModeCOMPLEX16TimeSeries(V, phi,
@@ -613,14 +662,19 @@ int XLALSimInspiralTaylorT1PN(
 		REAL8 i,                        /**< inclination of source (rad) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< flag to control spin and tidal effects */
+                REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int O                           /**< twice post-Newtonian order */
 		)
 {
 	/* set v0 to default value 1 */
 	return XLALSimInspiralTaylorT1PNGenerator(hplus, hcross, phiRef, 1.0,
 			deltaT, m1, m2, f_min, fRef, r, i, lambda1, lambda2,
-			tideO, O, O);
+			bN1, bN2, wHat1, wHat2, tideO, diss, O, O);
 }
 
 
@@ -645,7 +699,12 @@ int XLALSimInspiralTaylorT1PNRestricted(
 		REAL8 i,                        /**< inclination of source (rad) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< flag to control spin and tidal effects */
+                REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int O                           /**< twice post-Newtonian phase order */
 		)
 {
@@ -653,7 +712,7 @@ int XLALSimInspiralTaylorT1PNRestricted(
 	/* set v0 to default value 1 */
 	return XLALSimInspiralTaylorT1PNGenerator(hplus, hcross, phiRef, 1.0,
 			deltaT, m1, m2, f_min, fRef, r, i, lambda1, lambda2,
-			tideO, 0, O);
+			bN1, bN2, wHat1, wHat2, tideO, diss, 0, O);
 }
 
 
@@ -674,7 +733,7 @@ int main(void)
 	int O = -1;
 	REAL8TimeSeries *hplus;
 	REAL8TimeSeries *hcross;
-	XLALSimInspiralTaylorT1PN(&hplus, &hcross, &tc, phic, deltaT, m1, m2, f_min, fRef, r, i, lambda1, lambda2, tideO, O);
+	XLALSimInspiralTaylorT1PN(&hplus, &hcross, &tc, phic, deltaT, m1, m2, f_min, fRef, r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, tideO, diss, O);
 	LALDPrintTimeSeries(hplus, "hp.dat");
 	LALDPrintTimeSeries(hcross, "hc.dat");
 	XLALDestroyREAL8TimeSeries(hplus);

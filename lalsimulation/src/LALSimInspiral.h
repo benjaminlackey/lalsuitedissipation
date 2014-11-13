@@ -1019,6 +1019,10 @@ int XLALSimInspiralChooseWaveform(
     REAL8 i,                                    /**< inclination of source (rad) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                      		/**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                      		/**< beta*N for body 2 */
+    REAL8 wHat1,                    		/**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                    		/**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -1052,6 +1056,10 @@ int XLALSimInspiralChooseTDWaveform(
     REAL8 i,                    /**< inclination of source (rad) */
     REAL8 lambda1,              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                  /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                  /**< beta*N for body 2 */
+    REAL8 wHat1,                /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                /**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags, /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, /**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,             /**< twice post-Newtonian amplitude order */
@@ -1136,6 +1144,10 @@ int XLALSimInspiralTD(
     REAL8 i,                                    /**< inclination of source (rad) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                                  /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                                  /**< beta*N for body 2 */
+    REAL8 wHat1,                                /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                                /**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -1201,6 +1213,10 @@ int XLALSimInspiralFD(
     REAL8 i,                                    /**< inclination of source (rad) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                                  /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                                  /**< beta*N for body 2 */
+    REAL8 wHat1,                                /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                                /**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -1223,6 +1239,10 @@ SphHarmTimeSeries *XLALSimInspiralChooseTDModes(
     REAL8 r,                                    /**< distance of source (m) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                                  /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                                  /**< beta*N for body 2 */
+    REAL8 wHat1,                                /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                                /**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -1246,6 +1266,10 @@ COMPLEX16TimeSeries *XLALSimInspiralChooseTDMode(
     REAL8 r,                                    /**< distance of source (m) */
     REAL8 lambda1,                              /**< (tidal deformability of mass 1) / m1^5 (dimensionless) */
     REAL8 lambda2,                              /**< (tidal deformability of mass 2) / m2^5 (dimensionless) */
+    REAL8 bN1,                                  /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+    REAL8 bN2,                                  /**< beta*N for body 2 */
+    REAL8 wHat1,                                /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+    REAL8 wHat2,                                /**< omega/(200*omega_0) for body 2. */
     LALSimInspiralWaveformFlags *waveFlags,     /**< Set of flags to control special behavior of some waveform families. Pass in NULL (or None in python) for default flags */
     LALSimInspiralTestGRParam *nonGRparams, 	/**< Linked list of non-GR parameters. Pass in NULL (or None in python) for standard GR waveforms */
     int amplitudeO,                             /**< twice post-Newtonian amplitude order */
@@ -1697,7 +1721,12 @@ int XLALSimInspiralTaylorT1PNEvolveOrbit(
 		REAL8 fRef,                     /**< reference frequency (Hz) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int O                           /**< twice post-Newtonian order */
 		);
 
@@ -1721,7 +1750,12 @@ int XLALSimInspiralTaylorT1PNGenerator(
 		REAL8 i,                        /**< inclination of source (rad) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int amplitudeO,                 /**< twice post-Newtonian amplitude order */
 		int phaseO                      /**< twice post-Newtonian phase order */
 		);
@@ -1741,7 +1775,12 @@ SphHarmTimeSeries *XLALSimInspiralTaylorT1PNModes(
 		REAL8 r,                        /**< distance of source (m) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int amplitudeO,                 /**< twice post-Newtonian amplitude order */
 		int phaseO,                     /**< twice post-Newtonian phase order */
 		int lmax                        /**<  generate all modes with l <= lmax */
@@ -1762,7 +1801,12 @@ COMPLEX16TimeSeries *XLALSimInspiralTaylorT1PNMode(
 		REAL8 r,                        /**< distance of source (m) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int amplitudeO,                 /**< twice post-Newtonian amplitude order */
 		int phaseO,                     /**< twice post-Newtonian phase order */
 		int l,                          /**< l index of mode */
@@ -1791,7 +1835,12 @@ int XLALSimInspiralTaylorT1PN(
 		REAL8 i,                        /**< inclination of source (rad) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int O                           /**< twice post-Newtonian order */
 		);
 
@@ -1816,7 +1865,12 @@ int XLALSimInspiralTaylorT1PNRestricted(
 		REAL8 i,                        /**< inclination of source (rad) */
 		REAL8 lambda1,                  /**< (tidal deformability of body 1)/(mass of body 1)^5 */
 		REAL8 lambda2,                  /**< (tidal deformability of body 2)/(mass of body 2)^5 */
-		LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                REAL8 bN1,                      /**< beta*N for body 1. Relative saturation amplitude times number of saturated modes */
+                REAL8 bN2,                      /**< beta*N for body 2 */
+                REAL8 wHat1,                    /**< omega/(200*omega_0) for body 1. omega is the p mode frequency */
+                REAL8 wHat2,                    /**< omega/(200*omega_0) for body 2. */
+                LALSimInspiralTidalOrder tideO, /**< twice PN order of tidal effects */
+                LALSimInspiralDissipation diss, /**< flag for dissipation from saturated p and g modes */
 		int O                           /**< twice post-Newtonian phase order */
 		);
 

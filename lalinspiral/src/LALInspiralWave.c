@@ -164,6 +164,10 @@ int XLALSimInspiralChooseWaveformFromSimInspiral(
    REAL8 i = thisRow->inclination;
    REAL8 lambda1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
    REAL8 lambda2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+   REAL8 bN1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+   REAL8 bN2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+   REAL8 wHat1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+   REAL8 wHat2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
    LALSimInspiralWaveformFlags *waveFlags=XLALSimInspiralCreateWaveformFlags();
    LALSimInspiralTestGRParam *nonGRparams = NULL;
    int amplitudeO = thisRow->amp_order;
@@ -195,7 +199,7 @@ int XLALSimInspiralChooseWaveformFromSimInspiral(
       default:
          ret = XLALSimInspiralChooseTDWaveform(hplus, hcross, phi0, deltaT,
                m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i,
-               lambda1, lambda2, waveFlags, nonGRparams, amplitudeO,
+               lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO,
                order, approximant);
          XLALSimInspiralDestroyWaveformFlags(waveFlags);
          XLALSimInspiralDestroyTestGRParam(nonGRparams);
@@ -246,6 +250,10 @@ int XLALInspiralTDWaveformFromSimInspiral(
    REAL8 i = thisRow->inclination;
    REAL8 lambda1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
    REAL8 lambda2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+   REAL8 bN1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+   REAL8 bN2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+   REAL8 wHat1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+   REAL8 wHat2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
    REAL8 z = 0.; /* FIXME:0 means zero redshift, this should be obtained by some other means */
    LALSimInspiralWaveformFlags *waveFlags=XLALSimInspiralCreateWaveformFlags();
    LALSimInspiralTestGRParam *nonGRparams = NULL;
@@ -265,7 +273,7 @@ int XLALInspiralTDWaveformFromSimInspiral(
    /* taper = XLALGetTaperFromString(thisRow->taper); */
 
    /* generate +,x waveforms */
-   ret = XLALSimInspiralTD(hplus, hcross, phi0, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, z, i, lambda1, lambda2, waveFlags, nonGRparams, amplitudeO, order, approximant);
+   ret = XLALSimInspiralTD(hplus, hcross, phi0, deltaT, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, z, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, waveFlags, nonGRparams, amplitudeO, order, approximant);
    XLALSimInspiralDestroyWaveformFlags(waveFlags);
    XLALSimInspiralDestroyTestGRParam(nonGRparams);
    if( ret == XLAL_FAILURE )
@@ -306,6 +314,10 @@ XLALSimInspiralChooseWaveformFromInspiralTemplate(
   REAL8 i = params->inclination;
   REAL8 lambda1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
   REAL8 lambda2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+  REAL8 bN1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+  REAL8 bN2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+  REAL8 wHat1 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
+  REAL8 wHat2 = 0.; /* FIXME:0 turns these terms off, these should be obtained by some other means */
   LALSimInspiralWaveformFlags *waveFlags = XLALSimInspiralCreateWaveformFlags();
   LALSimInspiralTestGRParam *nonGRparams = NULL;
   LALPNOrder amplitudeO = params->ampOrder;
@@ -314,7 +326,7 @@ XLALSimInspiralChooseWaveformFromInspiralTemplate(
 
   /* generate +,x waveforms */
   ret = XLALSimInspiralChooseTDWaveform(hplus, hcross, phi0, deltaT, m1, m2,
-            S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i, lambda1, lambda2,
+            S1x, S1y, S1z, S2x, S2y, S2z, f_min, f_ref, r, i, lambda1, lambda2, bN1, bN2, wHat1, wHat2, 
             waveFlags, nonGRparams, amplitudeO, order, approximant);
   XLALSimInspiralDestroyWaveformFlags(waveFlags);
   XLALSimInspiralDestroyTestGRParam(nonGRparams);

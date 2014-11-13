@@ -28,6 +28,7 @@
 #define LAL_SIM_INSPIRAL_TIDAL_ORDER_DEFAULT LAL_SIM_INSPIRAL_TIDAL_ORDER_ALL
 #define LAL_SIM_INSPIRAL_FRAME_AXIS_DEFAULT LAL_SIM_INSPIRAL_FRAME_AXIS_VIEW
 #define LAL_SIM_INSPIRAL_MODES_CHOICE_DEFAULT LAL_SIM_INSPIRAL_MODES_CHOICE_RESTRICTED
+#define LAL_SIM_INSPIRAL_DISSIPATION_DEFAULT LAL_SIM_INSPIRAL_DISSIPATION_ON
 
 /**
  * Enumeration of allowed PN orders of spin effects. All effects up to and
@@ -100,6 +101,14 @@ typedef enum {
   LAL_SIM_INSPIRAL_MODES_CHOICE_2AND3AND4AND5L = (1<<4) - 1,        /**< Include l=2,3,4,5 modes */
   LAL_SIM_INSPIRAL_MODES_CHOICE_ALL        = - 1,                   /**< Include all available modes */
 } LALSimInspiralModesChoice;
+
+/**
+ * Enumeration of dissipation flags for saturated daughter modes.
+ */
+typedef enum {
+    LAL_SIM_INSPIRAL_DISSIPATION_OFF = 0,
+    LAL_SIM_INSPIRAL_DISSIPATION_ON = 1
+} LALSimInspiralDissipation;
 
 /**
  * Struct containing several enumerated flags that control specialized behavior
@@ -241,6 +250,30 @@ LALSimInspiralModesChoice XLALSimInspiralGetModesChoice(
  */
 bool XLALSimInspiralModesChoiceIsDefault(
         LALSimInspiralModesChoice modesChoice
+        );
+
+/**
+ * Set the LALSimInspiralDissipation within a LALSimInspiralWaveformFlags struct
+ */
+void XLALSimInspiralSetDissipation(
+        LALSimInspiralWaveformFlags *waveFlags, /**< Struct whose flag will be set */
+        LALSimInspiralDissipation diss /**< value to set flag to */
+        );
+
+/**
+ * Get the LALSimInspiralDissipation within a LALSimInspiralWaveformFlags struct,
+ * or LAL_SIM_INSPIRAL_TIDAL_DISSIPATION if waveFlags is NULL
+ */
+LALSimInspiralDissipation XLALSimInspiralGetDissipation(
+        LALSimInspiralWaveformFlags *waveFlags
+        );
+
+/**
+ * Returns true if LALSimInspiralDissipation has default value
+ * returns false otherwise
+ */
+bool XLALSimInspiralDissipationIsDefault(
+        LALSimInspiralDissipation diss
         );
 
 #endif /* _LALSIMINSPIRALWAVEFORMFLAGS_H */
